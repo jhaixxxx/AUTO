@@ -1,53 +1,57 @@
-const axios = require('axios');
+/*
+    HTTPS://Y2PHEQ.ME
+*/
 
-module.exports.config = {
-  name: 'ai',
-  version: '1.0.0',
-  hasPermission: 0,
-  usePrefix: false,
-  aliases: ['gpt', 'openai'],
-  description: "An AI command powered by GPT-4",
-  usages: "ai [prompt]",
-  credits: 'Developer',
-  cooldowns: 3,
-  dependencies: {
-    "axios": ""
-  }
-};
+// EXPORTING MODULE
+module.exports = {
+  config: {
+    name: "ai",
+    description: "AI assistant",
+    role: 0,
+    prefix: !1,
+    usage: "ai [query]",
+    credits: "HTTPS://Y2PHEQ.ME",
+    cooldown: 10
+  },
 
-module.exports.run = async function({ api, event, args }) {
-  const input = args.join(' ');
+  // START
+  async run( {
+    api,
+    event,
+    args
+  }) {
+    async function BOT(__) {
+      api.sendMessage(__, event.threadID, event.messageID);
+    }
+    async function REACT(__) {
+      api.setMessageReaction(__, event.messageID, _ => {}, !0);
+    }
 
-  if (!input) {
-    api.sendMessage(`Please provide a question or statement after 'ai'. For example: 'ai What is the capital of France?'`, event.threadID, event.messageID);
-    return;
-  }
-  
-  if (input === "clear") {
+    /* USER INPUT */
+    let query = args.join("")
+    if (!query) {
+      BOT("Very demure, very mindful, and very helpful! \u2728\n\nHello there, I am your AI assistant that will help you answer your questions.\n\nExample: ai what are you?");
+    } REACT("\u23f3");
+
+    /* CALLBACK API */
     try {
-      await axios.post('https://satomoigpt.onrender.com/clear', { id: event.senderID });
-      return api.sendMessage("Chat history has been cleared.", event.threadID, event.messageID);
-    } catch {
-      return api.sendMessage('An error occurred while clearing the chat history.', event.threadID, event.messageID);
+      fetch("https://y2pheq.glitch.me/ai?prompt=" + query + "&uid=" + event.senderID)
+      .then(r => {
+        if (r.ok) {
+          return r.json()
+          console.log(r.json())
+        } else {
+          BOT("API DOWN");
+        }
+      }).then(x__ => (console.log(x__),
+        BOT(x__.response + "\n\n• clear conversation history: ai clear"), REACT("\u2705")
+      ));
+    } catch (error) {
+      console.error(error);
     }
   }
+}
 
-  api.sendMessage(`🔍 "${input}"`, event.threadID, event.messageID);
-  
-  try {
-    const url = event.type === "message_reply" && event.messageReply.attachments[0]?.type === "photo"
-      ? { link: event.messageReply.attachments[0].url }
-      : {};
-
-    const { data } = await axios.post('https://satomoigpt.onrender.com/chat', {
-      prompt: input,
-      customId: event.senderID,
-      ...url
-    });
-
-    api.sendMessage(`${data.message}`, event.threadID, event.messageID);
-    
-  } catch {
-    api.sendMessage('An error occurred while processing your request.', event.threadID, event.messageID);
-  }
-};
+/*
+    HTTPS://Y2PHEQ.ME
+*/
